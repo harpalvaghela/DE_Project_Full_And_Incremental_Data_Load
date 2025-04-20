@@ -1,0 +1,17 @@
+{
+	"name": "SQL_Script_Wildcards_CSV",
+	"properties": {
+		"content": {
+			"query": "-- Querying Data using Wildcards - CSV file\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK 'https://adlsgen2harpal.dfs.core.windows.net/csvfiles/CustomersDataCsv/*',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result] order by 1\n\n    ",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dbsqlpool",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

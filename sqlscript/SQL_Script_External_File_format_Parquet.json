@@ -1,0 +1,17 @@
+{
+	"name": "SQL_Script_External_File_format_Parquet",
+	"properties": {
+		"content": {
+			"query": "-- External File Format - Parquet File (iris.parquet)\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK 'https://adlsgen2harpal.dfs.core.windows.net/ctnharpal/ParquetFiles/iris.parquet',\n        FORMAT = 'Parquet'\n    ) AS [result]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dbsqlpool",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

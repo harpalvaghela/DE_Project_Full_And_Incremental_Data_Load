@@ -1,0 +1,17 @@
+{
+	"name": "SQL_Script_External_Table_CSV",
+	"properties": {
+		"content": {
+			"query": "DROP  EXTERNAL TABLE dbo.CompanyFinanceData ;\nDrop EXTERNAL FILE FORMAT SynapseDelimitedTextFormat;\nDROP EXTERNAL DATA SOURCE ctnharpal_adlsgen2harpal_dfs_core_windows_net;\n\nIF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') \n\tCREATE EXTERNAL FILE FORMAT DelimitedTextformat \n\tWITH ( FORMAT_TYPE = DELIMITEDTEXT, \n\t\tFORMAT_OPTIONS( \n\t\tFIELD_TERMINATOR = ',', \n\t\tSTRING_DELIMITER = '\"', \n\t\tFIRST_ROW = 2, \n\t\tENCODING = 'UTF8', \n\t\tPARSER_VERSION = '2.0'\n\t\t))\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'ctnharpal_adlsgen2harpal_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE ctnharpal_adlsgen2harpal_dfs_core_windowsnet\n\tWITH (\n\t\tLOCATION = 'abfss://ctnharpal@adlsgen2harpal.dfs.core.windows.net/' \n\t)\nGO\n--DROP  EXTERNAL TABLE dbo.CompanyFinanceData \nCREATE EXTERNAL TABLE dbo.CompanyFinanceData (\n\t[financial_id] nvarchar(4000),\n\t[company_id] nvarchar(4000),\n\t[revenue] nvarchar(4000),\n\t[employee_size] nvarchar(4000),\n\t[total_departments] nvarchar(4000),\n\t[market_cap] nvarchar(4000),\n\t[net_income] nvarchar(4000),\n\t[year_end] nvarchar(4000)\n\t)\n\tWITH (\n\tLOCATION = 'CompanyFinancials.csv',\n\tDATA_SOURCE = ctnharpal_adlsgen2harpal_dfs_core_windowsnet,\n\tFILE_FORMAT = DelimitedTextformat\n\t)\nGO\n\n\nSELECT TOP 100 * FROM dbo.CompanyFinanceData\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dbsqlpool",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

@@ -1,0 +1,30 @@
+{
+	"name": "Pipeline 1",
+	"properties": {
+		"activities": [
+			{
+				"name": "DB Notebook",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Harpal_Work_Files/Class_39_Connect_SQL_Database_Dynamic"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_notebook",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2025-04-14T03:23:45Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

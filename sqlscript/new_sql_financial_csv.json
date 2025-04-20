@@ -1,0 +1,17 @@
+{
+	"name": "new_sql_financial_csv",
+	"properties": {
+		"content": {
+			"query": "--financial_id,company_id,revenue,employee_size,total_departments,market_cap,net_income,year_end\n-- CompanyFinancials.csv\ndrop EXTERNAL DATA source financialsdata\nCREATE EXTERNAL DATA SOURCE financialsdata WITH ( LOCATION = 'https://adlsgen2harpal.dfs.core.windows.net/ctnharpal/');\n\ndrop EXTERNAL FILE format  financialsexternal\nCREATE EXTERNAL FILE FORMAT financialsexternal\nWITH ( \n\tFORMAT_TYPE = DELIMITEDTEXT, \n\tFORMAT_OPTIONS( \n\t\tFIELD_TERMINATOR = ',', \n\t\tSTRING_DELIMITER = '\"', \n\t\tFIRST_ROW = 2, \n\t\tENCODING = 'UTF8', \n\t\tPARSER_VERSION = '2.0' \n\t\t));\n\ndrop EXTERNAL table companyfinancecsv\nCreate EXTERNAL TABLE companyfinancecsv\n(\n    [financial_id] INT,\n    [company_id] INT,\n    [reven] BIGINT,\n    [com_size] INT,\n    [total_departments] INT,\n    [market_cap] BIGINT,\n    [net_income] BIGINT,\n    [year_end] INT\n)\nWITH(\n    LOCATION='CompanyFinancials.csv',\n    DATA_SOURCE=financialsdata,\n    FILE_FORMAT=financialsexternal\n)\nGo\n\nSelect * from companyfinancecsv\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dbsqlpool",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

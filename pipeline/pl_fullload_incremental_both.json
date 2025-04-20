@@ -1,0 +1,268 @@
+{
+	"name": "pl_fullload_incremental_both",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Watermark3 Data",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "azuresqllookup",
+						"type": "DatasetReference",
+						"parameters": {
+							"SchemaName": "dbo",
+							"TableName": "Watermark3"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Watermark3 Data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Watermark3 Data').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "GetSourceMaxValue",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "Select MAX(@{item().DELTA_COLUMN}) as MaxValue from @{item().SCHEMA_NAME}.@{item().TABLE_NAME}",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "azuresqllookup",
+									"type": "DatasetReference",
+									"parameters": {
+										"SchemaName": "' '",
+										"TableName": "' '"
+									}
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "If Condition",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "GetSourceMaxValue",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@or(\n    and(\n        equals(item().IsFullLoad, true),\n        or(\n            equals(item().LPV, '0'),\n            or(\n                equals(item().LPV, '1900-01-01 00:00:00'),\n                less(item().LPV, string(activity('GetSourceMaxValue').output.firstRow.MaxValue))\n            )\n        )\n    ),\n    and(\n        equals(item().IsFullLoad, false),\n        less(item().LPV, string(activity('GetSourceMaxValue').output.firstRow.MaxValue))\n    )\n)\n\n\n\n\n",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "SQL to ADLS",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderStoredProcedureName": "[dbo].[usp_ExecuteConditionalQuery]",
+												"storedProcedureParameters": {
+													"DeltaColumn": {
+														"type": "String",
+														"value": {
+															"value": "@item().DELTA_COLUMN",
+															"type": "Expression"
+														}
+													},
+													"isFullLoad": {
+														"type": "Boolean",
+														"value": {
+															"value": "@item().IsFullLoad",
+															"type": "Expression"
+														}
+													},
+													"LPV": {
+														"type": "String",
+														"value": {
+															"value": "@item().LPV",
+															"type": "Expression"
+														}
+													},
+													"MaxValue": {
+														"type": "String",
+														"value": {
+															"value": "@activity('GetSourceMaxValue').output.firstRow.MaxValue",
+															"type": "Expression"
+														}
+													},
+													"SchemaName": {
+														"type": "String",
+														"value": {
+															"value": "@item().SCHEMA_NAME",
+															"type": "Expression"
+														}
+													},
+													"TableName": {
+														"type": "String",
+														"value": {
+															"value": "@item().TABLE_NAME",
+															"type": "Expression"
+														}
+													}
+												},
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
+											"sink": {
+												"type": "DelimitedTextSink",
+												"storeSettings": {
+													"type": "AzureBlobFSWriteSettings"
+												},
+												"formatSettings": {
+													"type": "DelimitedTextWriteSettings",
+													"quoteAllText": true,
+													"fileExtension": ".txt"
+												}
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
+										},
+										"inputs": [
+											{
+												"referenceName": "azuresqllookup",
+												"type": "DatasetReference",
+												"parameters": {
+													"SchemaName": "' '",
+													"TableName": "' '"
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "ds_csvfiles",
+												"type": "DatasetReference",
+												"parameters": {
+													"FolderName": {
+														"value": "@item().FOLDER_NAME",
+														"type": "Expression"
+													},
+													"FileName": {
+														"value": "@concat(item().TABLE_NAME,'_',utcNow(),'.csv')",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "Update LPV Value",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "SQL to ADLS",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"storedProcedureName": "[dbo].[USP_WATERMARK3_UPDATE]",
+											"storedProcedureParameters": {
+												"LPV_Value": {
+													"value": {
+														"value": "@activity('GetSourceMaxValue').output.firstRow.MaxValue",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"Table_Name": {
+													"value": {
+														"value": "@item().TABLE_NAME",
+														"type": "Expression"
+													},
+													"type": "String"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "azuresqllookup",
+											"type": "LinkedServiceReference"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2025-03-23T03:17:01Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

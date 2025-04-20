@@ -1,0 +1,17 @@
+{
+	"name": "SQL_Script_External_File_format_CSV",
+	"properties": {
+		"content": {
+			"query": "-- External File Format - CSV File (sample_homes.csv)\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK 'https://adlsgen2harpal.dfs.core.windows.net/csvfiles/sample_homes.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dbsqlpool",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

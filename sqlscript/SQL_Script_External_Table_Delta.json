@@ -1,0 +1,17 @@
+{
+	"name": "SQL_Script_External_Table_Delta",
+	"properties": {
+		"content": {
+			"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseParquetFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseParquetFormat] \n\tWITH ( FORMAT_TYPE = PARQUET)\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'ctnharpal_adlsgen2harpal_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [ctnharpal_adlsgen2harpal_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION = 'abfss://ctnharpal@adlsgen2harpal.dfs.core.windows.net' \n\t)\nGO\n\nCREATE EXTERNAL TABLE dbo.CustomerDeltaTable (\n\t[Sell] nvarchar(4000),\n\t[List] smallint,\n\t[Living] smallint,\n\t[Rooms] smallint,\n\t[Beds] smallint,\n\t[Baths] smallint,\n\t[Age] smallint,\n\t[Acres] float,\n\t[Taxes] smallint,\n\t[TodaysDate] datetime2(7)\n\t)\n\tWITH (\n\tLOCATION = 'CustomerDelta/**',\n\tDATA_SOURCE = [ctnharpal_adlsgen2harpal_dfs_core_windows_net],\n\tFILE_FORMAT = [SynapseParquetFormat]\n\t)\nGO\n\n\nSELECT TOP 100 * FROM dbo.CustomerDeltaTable\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dbsqlpool",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

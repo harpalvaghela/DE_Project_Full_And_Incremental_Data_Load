@@ -1,0 +1,17 @@
+{
+	"name": "SQL_Script_Wildcards_Parquet",
+	"properties": {
+		"content": {
+			"query": "-- Querying Data using Wildcards - Parquet File\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK 'https://adlsgen2harpal.dfs.core.windows.net/ctnharpal/ParquetFiles/*',\n        FORMAT = 'Parquet'\n    ) AS [result]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dbsqlpool",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

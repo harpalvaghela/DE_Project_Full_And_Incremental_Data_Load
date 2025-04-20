@@ -1,0 +1,17 @@
+{
+	"name": "SQL_Script_External_Table_CSVFile",
+	"properties": {
+		"content": {
+			"query": "CREATE EXTERNAL DATA SOURCE customerdatasource WITH ( LOCATION = 'abfss://ctnharpal@adlsgen2harpal.dfs.core.windows.net');\n\nCREATE EXTERNAL FILE FORMAT customerDataCSV\nWITH ( \n\tFORMAT_TYPE = DELIMITEDTEXT, \n\tFORMAT_OPTIONS( \n\t\tFIELD_TERMINATOR = ',', \n\t\tSTRING_DELIMITER = '\"', \n\t\tFIRST_ROW = 2, \n\t\tENCODING = 'UTF8', \n\t\tPARSER_VERSION = '2.0' \n\t\t));\n\nCREATE EXTERNAL TABLE dbo.CustomerData (\n\t[Index] nvarchar(4000),\n\t[Customer Id] nvarchar(4000),\n\t[First Name] nvarchar(4000),\n\t[Last Name] nvarchar(4000),\n\t[Company] nvarchar(4000),\n\t[City] nvarchar(4000),\n\t[Phone 1] nvarchar(4000),\n\t[Phone 2] nvarchar(4000),\n\t[Email] nvarchar(4000),\n\t[Subscription Date] nvarchar(4000),\n\t[Website] nvarchar(4000)\t\n\t)\n\tWITH (\n\tLOCATION = 'customers.csv',\n\tDATA_SOURCE = [customerdatasource],\n\tFILE_FORMAT = [customerDataCSV]\n\t)\nGO\n\n\nSELECT TOP 100 * FROM dbo.CustomerData\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dbsqlpool",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

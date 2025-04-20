@@ -1,0 +1,91 @@
+{
+	"name": "df_delta_file_scd_type1_sample_homes",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "wsp-synapse-hp-WorkspaceDefaultStorage",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "wsp-synapse-hp-WorkspaceDefaultStorage",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn"
+				},
+				{
+					"name": "alterRow"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Sell as string,",
+				"          List as short,",
+				"          Living as short,",
+				"          Rooms as short,",
+				"          Beds as short,",
+				"          Baths as short,",
+				"          Age as short,",
+				"          Acres as double,",
+				"          Taxes as short",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'csvfiles',",
+				"     fileName: 'sample_homes.csv',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> source",
+				"source derive(TodaysDate = currentTimestamp()) ~> derivedColumn",
+				"derivedColumn alterRow(upsertIf(1==1)) ~> alterRow",
+				"alterRow sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'ctnharpal',",
+				"     folderPath: 'CustomerDelta',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Sell'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          Sell,",
+				"          List,",
+				"          Living,",
+				"          Rooms,",
+				"          Beds,",
+				"          Baths,",
+				"          Age,",
+				"          Acres,",
+				"          Taxes,",
+				"          TodaysDate",
+				"     )) ~> sink"
+			]
+		}
+	}
+}

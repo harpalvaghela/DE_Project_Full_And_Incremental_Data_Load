@@ -1,0 +1,34 @@
+{
+	"name": "pl_delta_file_scd_type_1_practice",
+	"properties": {
+		"activities": [
+			{
+				"name": "df_delta_file",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_delta_file_scd_type1_sample_homes",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2025-03-23T02:58:22Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}
